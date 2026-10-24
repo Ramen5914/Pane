@@ -1,21 +1,27 @@
 package net.ethrocky.pane.runtime;
 
-import org.lwjgl.glfw.GLFW;
+//? if <26.3 {
+/*import org.lwjgl.glfw.GLFW;
 
 import java.util.HashMap;
 import java.util.Map;
+*///?} else {
+import com.mojang.blaze3d.platform.cursor.CursorType;
+import com.mojang.blaze3d.platform.cursor.CursorTypes;
+//?}
 
-/** Hardware cursor shapes via GLFW standard cursors — created lazily, always set from
- *  the render thread (which is GLFW's main thread). Shape 0 restores the default arrow.
- *  No callbacks are registered.
+/**
+ * Hardware cursor shapes, selected from the render/main thread.
+ * Shape 0 restores the default arrow.
  *
- *  <p>A resize shape is RE-ASSERTED every frame while it's wanted, because Minecraft resets
- *  the OS cursor to the plain arrow on its own each frame while the pointer is unlocked. If we
- *  only set on change, MC's reset wins and the resize cursor flickers for a frame then vanishes.
- *  The default arrow is only re-set once, on the transition away from a resize shape, so we
- *  otherwise leave MC's cursor alone. */
+ * Non-default shapes are reasserted every frame while wanted.
+ * The arrow is restored only on the transition back to shape 0.
+ */
 final class CursorShapes {
-    private static final Map<Integer, Long> CURSORS = new HashMap<>();
+    //? if <26.3 {
+    /*private static final Map<Integer, Long> CURSORS = new HashMap<>();
+     *///?}
+
     private static int currentShape;
 
     private CursorShapes() {
@@ -23,22 +29,59 @@ final class CursorShapes {
 
     static void set(long windowHandle, int shape) {
         if (shape != 0) {
-            long cursor = resolve(shape);
-            if (cursor != 0L) GLFW.glfwSetCursor(windowHandle, cursor);   // beat MC's per-frame reset
+            //? if <26.3 {
+            /*long cursor = resolve(shape);
+            if (cursor != 0L) {
+                GLFW.glfwSetCursor(windowHandle, cursor);
+            }
+            *///?} else {
+            resolve(shape).select();
+            //?}
+
             currentShape = shape;
         } else if (currentShape != 0) {
-            GLFW.glfwSetCursor(windowHandle, 0L);   // restore the arrow once, then hands off
+            //? if <26.3 {
+            /*GLFW.glfwSetCursor(windowHandle, 0L);
+             *///?} else {
+            CursorTypes.ARROW.select();
+            //?}
+
             currentShape = 0;
         }
     }
 
-    private static long resolve(int shape) {
-        long cursor = CURSORS.computeIfAbsent(shape, GLFW::glfwCreateStandardCursor);
+    //? if <26.3 {
+    /*private static long resolve(int shape) {
+        long cursor = CURSORS.computeIfAbsent(
+                shape, GLFW::glfwCreateStandardCursor
+        );
+
         if (cursor == 0L) {
-            // Platform lacks this standard cursor (some Linux setups miss the
-            // diagonals) — fall back to a plain resize arrow.
-            cursor = CURSORS.computeIfAbsent(GLFW.GLFW_RESIZE_EW_CURSOR, GLFW::glfwCreateStandardCursor);
+            cursor = CURSORS.computeIfAbsent(
+                    GLFW.GLFW_RESIZE_EW_CURSOR,
+                    GLFW::glfwCreateStandardCursor
+            );
         }
+
         return cursor;
     }
+    *///?} else {
+    private static CursorType resolve(int shape) {
+        // Preserve the existing GLFW shape IDs as this helper's input format.
+        // These are IDs, not native cursor handles.
+        return switch (shape) {
+            case 0x00036001 -> CursorTypes.ARROW;
+            case 0x00036002 -> CursorTypes.IBEAM;
+            case 0x00036003 -> CursorTypes.CROSSHAIR;
+            case 0x00036004 -> CursorTypes.POINTING_HAND;
+            case 0x00036005 -> CursorTypes.RESIZE_EW;
+            case 0x00036006 -> CursorTypes.RESIZE_NS;
+            case 0x00036009 -> CursorTypes.RESIZE_ALL;
+            case 0x0003600A -> CursorTypes.NOT_ALLOWED;
+
+            // Includes diagonal resize IDs: use your existing EW fallback.
+            default -> CursorTypes.RESIZE_EW;
+        };
+    }
+    //?}
 }

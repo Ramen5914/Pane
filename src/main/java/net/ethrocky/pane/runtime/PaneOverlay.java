@@ -363,12 +363,23 @@ public final class PaneOverlay {
     }
 
     private static int shapeFor(int edges) {
-        boolean l = (edges & Window.LEFT) != 0, r = (edges & Window.RIGHT) != 0;
-        boolean t = (edges & Window.TOP) != 0, b = (edges & Window.BOTTOM) != 0;
-        if ((l && t) || (r && b)) return org.lwjgl.glfw.GLFW.GLFW_RESIZE_NWSE_CURSOR;
+        boolean l = (edges & Window.LEFT) != 0;
+        boolean r = (edges & Window.RIGHT) != 0;
+        boolean t = (edges & Window.TOP) != 0;
+        boolean b = (edges & Window.BOTTOM) != 0;
+
+        //? if >=26.3 {
+        if ((l && t) || (r && b)) return 0x00036007; // NWSE
+        if ((r && t) || (l && b)) return 0x00036008; // NESW
+        if (l || r) return 0x00036005;              // EW
+        if (t || b) return 0x00036006;              // NS
+        //?} else {
+        /*if ((l && t) || (r && b)) return org.lwjgl.glfw.GLFW.GLFW_RESIZE_NWSE_CURSOR;
         if ((r && t) || (l && b)) return org.lwjgl.glfw.GLFW.GLFW_RESIZE_NESW_CURSOR;
         if (l || r) return org.lwjgl.glfw.GLFW.GLFW_RESIZE_EW_CURSOR;
         if (t || b) return org.lwjgl.glfw.GLFW.GLFW_RESIZE_NS_CURSOR;
+        *///?}
+
         return 0;
     }
 

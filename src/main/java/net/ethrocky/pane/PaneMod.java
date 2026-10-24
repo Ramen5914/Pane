@@ -1,7 +1,7 @@
 package net.ethrocky.pane;
 
 //? if fabric {
-import net.fabricmc.api.ModInitializer;
+/*import net.fabricmc.api.ModInitializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -13,4 +13,4 @@ public class PaneMod implements ModInitializer {
         LOGGER.info("Pane initialised.");
     }
 }
-//?}
+*///?}

@@ -24,25 +24,42 @@ public final class PaneBootstrap {
     /** OS clipboard + localized key names. Lazy lambdas: the window need not exist yet. */
     public static void initClient() {
         net.ethrocky.pane.core.PaneClipboard.install(
-                () -> org.lwjgl.glfw.GLFW.glfwGetClipboardString(windowHandle()),
-                s -> org.lwjgl.glfw.GLFW.glfwSetClipboardString(windowHandle(), s));
-        net.ethrocky.pane.widget.KeybindField.setKeyNames(code -> code < 0 ? "None"
-                : InputConstants.Type.KEYSYM.getOrCreate(code).getDisplayName().getString());
+                () -> Minecraft.getInstance().keyboardHandler.getClipboard(),
+                s -> Minecraft.getInstance().keyboardHandler.setClipboard(s)
+        );
+
+        net.ethrocky.pane.widget.KeybindField.setKeyNames(code -> {
+            if (code < 0) {
+                return "None";
+            }
+
+            //? if >=26.3 {
+            return InputConstants.Type.KEYBOARD
+                    .getOrCreate(code)
+                    .getDisplayName()
+                    .getString();
+            //?} else {
+            /*return InputConstants.Type.KEYSYM
+                    .getOrCreate(code)
+                    .getDisplayName()
+                    .getString();
+            *///?}
+        });
     }
 
     /** True in a development run (gradle runClient) — gates the widget gallery. */
     public static boolean devEnvironment() {
         //? if fabric {
-        return net.fabricmc.loader.api.FabricLoader.getInstance().isDevelopmentEnvironment();
-        //?} else {
-        /*try {
+        /*return net.fabricmc.loader.api.FabricLoader.getInstance().isDevelopmentEnvironment();
+        *///?} else {
+        try {
             // Reflection dodges FMLLoader's static-to-instance rework across versions.
             Class<?> c = Class.forName("net.neoforged.fml.loading.FMLLoader");
             return !((Boolean) c.getMethod("isProduction").invoke(null));
         } catch (Throwable t) {
             return false;   // unknown loader era: behave like production
         }
-        *///?}
+        //?}
     }
 
     /** The GLFW window pointer — the accessor was renamed in the 1.21.9 input rework. */

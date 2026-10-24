@@ -129,3 +129,9 @@ deps.fabric_api = "0.154.2+26.2"
 [neoforge."26.2"]
 mod.mc_compat = "[26.2]"
 deps.neo_loader = "26.2.0.62"
+
+["26.3"]
+mod.mc_releases = ["26.3"]
+[neoforge."26.3"]
+mod.mc_compat = "[26.3]"
+deps.neo_loader = "26.3.0.97"

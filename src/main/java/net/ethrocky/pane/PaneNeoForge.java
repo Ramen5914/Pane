@@ -1,7 +1,9 @@
 package net.ethrocky.pane;
 
 //? if neoforge {
-/*import com.mojang.blaze3d.platform.InputConstants;
+//? if >26.2
+import com.mojang.blaze3d.platform.InputConstants;
+import com.mojang.blaze3d.platform.InputConstants;
 import net.ethrocky.pane.runtime.PaneOverlay;
 import net.minecraft.client.KeyMapping;
 import net.neoforged.api.distmarker.Dist;
@@ -11,7 +13,8 @@ import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
 import net.neoforged.neoforge.client.event.RenderGuiEvent;
 import net.neoforged.neoforge.common.NeoForge;
-import org.lwjgl.glfw.GLFW;
+//? if <26.3
+//import org.lwjgl.glfw.GLFW;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,8 +31,13 @@ public final class PaneNeoForge {
         modBus.addListener((RegisterKeyMappingsEvent event) -> {
             TOGGLE_KEY = new KeyMapping(
                     "key.pane.toggle",
-                    InputConstants.Type.KEYSYM,
+                    //? if <26.3 {
+                    /*InputConstants.Type.KEYSYM,
                     GLFW.GLFW_KEY_P,
+                    *///?} else {
+                    InputConstants.Type.KEYBOARD,
+                    InputConstants.KEY_P,
+                    //?}
                     PaneBootstrap.toggleCategory()
             );
             event.register(TOGGLE_KEY);
@@ -47,4 +55,4 @@ public final class PaneNeoForge {
                 PaneOverlay.render(event.getGuiGraphics()));
     }
 }
-*///?}
+//?}
